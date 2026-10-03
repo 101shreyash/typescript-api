@@ -7,7 +7,7 @@ import "dotenv/config"
 async function SignUp(req: Request, res: Response) {
   const username: string = req.body.username;
   const password: string = req.body.password;
-  const role : string = req.body.role.toLowerCase()
+  const role : string = req.body.role?.toLowerCase()
 
   try {
     if (!username || username === undefined) {
@@ -172,4 +172,16 @@ async function Login(req: Request, res: Response) {
   }
 }
 
-export { SignUp, Login };
+
+function Logout(req : Request , res : Response) {
+
+ res.clearCookie("jwt")
+ return res.status(200).json({
+   success : true,
+    message : "Logout Sucessfull"
+  })
+
+}
+
+
+export { SignUp, Login , Logout };

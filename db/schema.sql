@@ -79,7 +79,7 @@ CREATE TABLE public.schema_migrations (
 CREATE TABLE public.users (
     userid integer NOT NULL,
     username character varying(30),
-    fullname text,
+    fullname character varying(30),
     password text,
     role public.userroles DEFAULT 'guest'::public.userroles
 );
@@ -172,4 +172,5 @@ ALTER TABLE ONLY public.notes
 
 INSERT INTO public.schema_migrations (version) VALUES
     ('20261001133523'),
-    ('20261002063249');
+    ('20261002063249'),
+    ('20261003082220');
