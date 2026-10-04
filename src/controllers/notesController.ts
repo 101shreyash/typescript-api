@@ -52,15 +52,92 @@ async function ViewNotes(req: Request, res: Response) {
   const userid = req.user?.userid;
 
   try {
-
-    const notes = await pool.query("SELECT * FROM notes WHERE userid = $1", [
-      userid,
-    ]);
+    const notes = await pool.query(
+      "SELECT noteid , title, content, created_at FROM notes WHERE userid = $1",
+      [userid],
+    );
 
     return res.status(200).json({
-      success : true,
-      message : notes.rows
-    })
+      success: true,
+      message: notes.rows,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: "Server Error",
+    });
+  }
+}
+
+async function UpdateNotes(req: Request, res: Response) {
+  try {
+    const userid = req.user?.userid;
+    const noteid = Number(req.params.noteid);
+    const title: string = req.body.title ?? null
+    const content: string = req.body.content ?? null
+
+
+    if (title === null && content === null) {
+
+     return res.status(400).json({
+        success : false,
+        message : "Provide at least title or contet"
+      })
+
+    }
+
+    const result = await pool.query(
+      "UPDATE notes SET title = COALESCE($1 , title) , content = COALESCE($2 , content) WHERE noteid = $3 AND userid = $4;",
+      [title, content, noteid, userid],
+    );
+
+
+    if (result.rowCount === 0) {
+
+     return res.status(404).json({
+       success : false,
+        message : "Note not found"
+      })
+
+    }
+
+
+    return res.status(200).json({
+      success: true,
+      message: "Note updated Successfully",
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: "Server Error",
+    });
+  }
+}
+
+async function DeleteNotes(req: Request, res: Response) {
+
+  const userid = req.user?.userid;
+  const noteid = req.params.noteid;
+
+  try {
+
+    const result =  await pool.query("DELETE FROM notes WHERE userid = $1 AND noteid = $2" , [userid , noteid])
+    
+    if (result.rowCount === 0) {
+
+      return res.status(404).json({
+       success : false,
+        message : "Note not found"
+      })
+    }
+
+     return res.status(200).json({
+        success: true,
+        message: "Note deleted Successfully",
+      });
+
 
   }
 
@@ -70,9 +147,7 @@ async function ViewNotes(req: Request, res: Response) {
       success: false,
       message: "Server Error",
     });
-
   }
-
 }
 
-export { PostNotes, ViewNotes };
+export { PostNotes, ViewNotes, UpdateNotes, DeleteNotes };
