@@ -1,13 +1,13 @@
 import { Request, Response } from "express";
 import pool from "../db.js";
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken"
-import "dotenv/config"
+import jwt from "jsonwebtoken";
+import "dotenv/config";
 
 async function SignUp(req: Request, res: Response) {
   const username: string = req.body.username;
   const password: string = req.body.password;
-  const role : string = req.body.role?.toLowerCase()
+  const role: string = req.body.role?.toLowerCase();
 
   try {
     if (!username || username === undefined) {
@@ -62,6 +62,7 @@ async function SignUp(req: Request, res: Response) {
 
     if (password.length < 8) {
       return res.status(400).json({
+        success: false,
         message: "Password Must contain of atleast 8 characters",
       });
     }
@@ -93,7 +94,6 @@ async function SignUp(req: Request, res: Response) {
 }
 
 async function Login(req: Request, res: Response) {
-
   try {
     const username = req.body.username as string;
     const PlainPassword = req.body.password as string;
@@ -117,53 +117,50 @@ async function Login(req: Request, res: Response) {
     ]);
 
     if (result.rowCount === 0) {
-
-     return res.status(401).json({
-         success : false,
-         message : "Invalid Credentials , Enter valid Credentials"
-      })
+      return res.status(401).json({
+        success: false,
+        message: "Invalid Credentials , Enter valid Credentials",
+      });
     }
-
 
     type Userinfo = {
+      userid: number;
+      username: string;
+      fullname: unknown;
+      password: string;
+      role: string;
+    };
 
-       userid : number ,
-       username : string,
-       fullname : unknown,
-       password : string,
-       role : string
+    const userinfo: Userinfo = result.rows[0];
+    const matched = await bcrypt.compare(PlainPassword, userinfo.password);
+
+    if (!matched) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid Credentials , Enter valid Credentials",
+      });
     }
 
-  const userinfo : Userinfo = result.rows[0]
-   const matched = await bcrypt.compare(PlainPassword , userinfo.password)
+    if (matched) {
+      const token = jwt.sign(
+        {
+          username: userinfo.username,
+          userid: userinfo.userid,
+          role: userinfo.role,
+        },
+        process.env.JWTSECKEY as string,
+        { expiresIn: "2h" },
+      );
 
-   if (!matched) {
-
-    return res.status(401).json({
-         success : false,
-         message : "Invalid Credentials , Enter valid Credentials"
-      })
+      res.cookie("jwt", token);
+      return res.status(200).json({
+        success: true,
+        message: "Logged In Sucessfull",
+      });
     }
+  } catch (error: any) {
+    // try block ends here
 
-  if (matched) {
-
-    const token = jwt.sign({username : userinfo.username , userid : userinfo.userid, role : userinfo.role} ,
-      process.env.JWTSECKEY as string , {expiresIn : "2h"}
-    )
-
-  res.cookie("jwt" , token)
-   return res.status(200).json({
-      success : true,
-      message : "Logged In Sucessfull"
-    })
-
-  }
-
-
-  } // try block ends here
-
-
-  catch (error: any) {
     console.log(error);
     return res.json({
       success: false,
@@ -172,16 +169,12 @@ async function Login(req: Request, res: Response) {
   }
 }
 
-
-function Logout(req : Request , res : Response) {
-
- res.clearCookie("jwt")
- return res.status(200).json({
-   success : true,
-    message : "Logout Sucessfull"
-  })
-
+function Logout(req: Request, res: Response) {
+  res.clearCookie("jwt");
+  return res.status(200).json({
+    success: true,
+    message: "Logout Sucessfull",
+  });
 }
 
-
-export { SignUp, Login , Logout };
+export { SignUp, Login, Logout };

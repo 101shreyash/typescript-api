@@ -1,4 +1,3 @@
-import express from "express";
 import { Request, Response } from "express";
 import pool from "../db.js";
 
@@ -57,6 +56,13 @@ async function ViewNotes(req: Request, res: Response) {
       [userid],
     );
 
+    if (notes.rowCount === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "You don't have any notes right now. Try Adding Some",
+      });
+    }
+
     return res.status(200).json({
       success: true,
       message: notes.rows,
@@ -74,17 +80,14 @@ async function UpdateNotes(req: Request, res: Response) {
   try {
     const userid = req.user?.userid;
     const noteid = Number(req.params.noteid);
-    const title: string = req.body.title ?? null
-    const content: string = req.body.content ?? null
-
+    const title: string = req.body.title ?? null;
+    const content: string = req.body.content ?? null;
 
     if (title === null && content === null) {
-
-     return res.status(400).json({
-        success : false,
-        message : "Provide at least title or contet"
-      })
-
+      return res.status(400).json({
+        success: false,
+        message: "Provide at least title or contet",
+      });
     }
 
     const result = await pool.query(
@@ -92,16 +95,12 @@ async function UpdateNotes(req: Request, res: Response) {
       [title, content, noteid, userid],
     );
 
-
     if (result.rowCount === 0) {
-
-     return res.status(404).json({
-       success : false,
-        message : "Note not found"
-      })
-
+      return res.status(404).json({
+        success: false,
+        message: "Note not found",
+      });
     }
-
 
     return res.status(200).json({
       success: true,
@@ -117,31 +116,27 @@ async function UpdateNotes(req: Request, res: Response) {
 }
 
 async function DeleteNotes(req: Request, res: Response) {
-
   const userid = req.user?.userid;
   const noteid = req.params.noteid;
 
   try {
+    const result = await pool.query(
+      "DELETE FROM notes WHERE userid = $1 AND noteid = $2",
+      [userid, noteid],
+    );
 
-    const result =  await pool.query("DELETE FROM notes WHERE userid = $1 AND noteid = $2" , [userid , noteid])
-    
     if (result.rowCount === 0) {
-
       return res.status(404).json({
-       success : false,
-        message : "Note not found"
-      })
+        success: false,
+        message: "Note not found",
+      });
     }
 
-     return res.status(200).json({
-        success: true,
-        message: "Note deleted Successfully",
-      });
-
-
-  }
-
-  catch (error) {
+    return res.status(200).json({
+      success: true,
+      message: "Note deleted Successfully",
+    });
+  } catch (error) {
     console.log(error);
     return res.status(500).json({
       success: false,

@@ -2,8 +2,8 @@ import { Request, Response } from "express";
 import pool from "../db.js";
 
 async function FullName(req: Request, res: Response) {
-  const fullname : string = req.body.fullname;
 
+  const fullname : string = req.body.fullname 
   const userid = req.user?.userid;
 
   if (!fullname || fullname === undefined) {
