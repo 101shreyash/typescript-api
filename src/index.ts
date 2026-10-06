@@ -8,6 +8,7 @@ import Authentication from "./routes/authRoute.js"
 import AskFullName from "./routes/infoRoute.js"
 import Notes from "./routes/notesRoute.js"
 import BrowseNote from "./routes/browseRoute.js"
+import DeleteAccount from "./routes/settingRoute.js"
 
 
 const app = express();
@@ -22,6 +23,7 @@ app.use("/auth" , Authentication)
 app.use("/api" , AskFullName)
 app.use("/api" , Notes)
 app.use("/api" , BrowseNote)
+app.use("/api" , DeleteAccount )
 
 
 app.listen(port , (() => {console.log(`Server Is running on port ${8001}`)}))

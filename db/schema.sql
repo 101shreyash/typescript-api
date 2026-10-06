@@ -156,7 +156,7 @@ ALTER TABLE ONLY public.users
 --
 
 ALTER TABLE ONLY public.notes
-    ADD CONSTRAINT notes_userid_fkey FOREIGN KEY (userid) REFERENCES public.users(userid);
+    ADD CONSTRAINT notes_userid_fkey FOREIGN KEY (userid) REFERENCES public.users(userid) ON DELETE CASCADE;
 
 
 --
@@ -173,4 +173,5 @@ ALTER TABLE ONLY public.notes
 INSERT INTO public.schema_migrations (version) VALUES
     ('20261001133523'),
     ('20261002063249'),
-    ('20261003082220');
+    ('20261003082220'),
+    ('20261006144239');
