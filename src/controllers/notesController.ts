@@ -35,7 +35,7 @@ async function PostNotes(req: Request, res: Response) {
 
     return res.status(200).json({
       success: true,
-      message: "Notes Sucessfully Added",
+      message: "Note Sucessfully Added",
     });
   } catch (error: any) {
     console.log(error.message);

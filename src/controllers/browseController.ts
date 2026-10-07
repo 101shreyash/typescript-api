@@ -44,26 +44,28 @@ async function BrowseNotes(req: Request, res: Response) {
       created_at: string;
     }
 
-    const playerInfo: QueryObject = result.rows[0];
+    const playerInfo: QueryObject [] = result.rows;
 
-    console.log(`observerRole`, observerRole);
-    console.log("PlayerRole", playerInfo.role);
 
-    if (playerInfo.role === "student" && observerRole === "student") {
+    // console.log(`observerRole`, observerRole);
+    // console.log("PlayerRole", playerInfo.role);
+
+
+    if (playerInfo[0]?.role === "student" && observerRole === "student") {
       return res.status(200).json({
         success: true,
         message: playerInfo,
       });
     }
 
-    else if (playerInfo.role === "guest" && observerRole === "guest") {
+    else if (playerInfo[0]?.role === "guest" && observerRole === "guest") {
       return res.status(200).json({
         success: true,
         message: playerInfo,
       });
     }
 
-    else if (observerRole === "teacher" && playerInfo.role === "student") {
+    else if (observerRole === "teacher" && playerInfo[0]?.role === "student") {
       return res.status(200).json({
         success: true,
         message: playerInfo,
@@ -73,7 +75,7 @@ async function BrowseNotes(req: Request, res: Response) {
     else {
       res.status(400).json({
         success: false,
-        message: `You being ${observerRole} could'not view ${playerInfo.role}'s Note.`,
+        message: `You being ${observerRole} could'not view ${playerInfo[0]?.role}'s Note.`,
       });
     }
   }
@@ -85,6 +87,8 @@ async function BrowseNotes(req: Request, res: Response) {
       message: "Server Error",
     });
   }
+
+
 }
 
 export default BrowseNotes;
